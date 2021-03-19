@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">albo</string>
+    <string name="pending_label">Transacciones pendientes</string>
+    <string name="blocked_label">Bloqueadas</string>
+    <string name="income_label">Ingresos</string>
+    <string name="expenses_label">Gastos</string>
+</resources>
