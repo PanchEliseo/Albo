@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import com.exam.albo.R
 import com.exam.albo.SecondPartActivity
 import com.exam.albo.databinding.ItemBeersBinding
@@ -16,6 +18,7 @@ import kotlinx.android.synthetic.main.detail_fragment.*
 class DetailBeerFragment : Fragment() {
 
     var beer: BeerK? = null
+    private val viewModel: DetailViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -24,7 +27,13 @@ class DetailBeerFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        beer = (activity as SecondPartActivity).beer
+        viewModel.beerLiveData.observe(viewLifecycleOwner, Observer {
+            beer = it
+            setView()
+        })
+    }
+
+    private fun setView(){
         (activity as AppCompatActivity).supportActionBar?.title = beer!!.name
         downloadImage()
         val tag = "Tagline: ${beer!!.tagline}"
@@ -44,6 +53,7 @@ class DetailBeerFragment : Fragment() {
     private fun downloadImage(){
         Picasso.with(context)
             .load(beer!!.imageUrl)
+            .placeholder(R.drawable.progress_animation)
             .into(ivDetailBeer)
     }
 

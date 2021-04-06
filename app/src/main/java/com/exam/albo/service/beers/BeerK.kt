@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName
 data class BeerK(
     @SerializedName("id")
     var id: Int = 0,
-    @SerializedName("name") @Expose
+    @SerializedName("name")
     var name: String? = null,
     @SerializedName("tagline")
     val tagline: String? = null,

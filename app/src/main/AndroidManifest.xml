@@ -12,7 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Albo">
         <activity android:name=".MainActivity">
-
         </activity>
         <activity android:name=".SecondPartActivity"
             >

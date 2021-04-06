@@ -1,6 +1,7 @@
 package com.exam.albo.ui.second
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,7 +37,13 @@ class BeersAdapter(private val context : Context, private val listBeers: Mutable
     private fun downloadImage(binding: ItemBeersBinding, position: Int){
         Picasso.with(context)
             .load(listBeers[position].imageUrl)
+            .placeholder(R.drawable.progress_animation)
             .into(binding.ivBeer)
+    }
+
+    fun updateList(list: MutableList<BeerK>){
+        listBeers.addAll(0, list)
+        notifyDataSetChanged()
     }
 
     fun setListenerClick(clickItemMovements: ClickItemList) {
@@ -49,7 +56,7 @@ class BeersAdapter(private val context : Context, private val listBeers: Mutable
         }
 
         override fun onClick(v: View?) {
-            onClickItem!!.clickButtons(v!!, adapterPosition)
+            onClickItem!!.clickButtons(v!!, adapterPosition, listBeers)
         }
     }
 

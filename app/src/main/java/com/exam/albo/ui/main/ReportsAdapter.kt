@@ -124,7 +124,13 @@ class ReportsAdapter(private val context : Context, private val activity: Activi
         binding.tvIncome.text = labelIncome
         val labelOut = "$"+formatDoubleToNPlaces(amountTotalOut)
         binding.tvExpenses.text = labelOut
-        listCategoriesByMonth[position]?.let { setListView(binding, it) }
+        Log.i("PORQUE", "--- ${listCategoriesByMonth[position]}")
+        if (listCategoriesByMonth[position] != null){
+            setListView(binding, listCategoriesByMonth[position]!!)
+        } else {
+            binding.rvCategories.adapter = null
+        }
+        //listCategoriesByMonth[position]?.let { setListView(binding, it) }
     }
 
     private fun setListView(binding: ItemListReportsBinding, listCategories: HashMap<String, Double>){

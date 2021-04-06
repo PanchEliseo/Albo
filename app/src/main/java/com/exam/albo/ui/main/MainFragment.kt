@@ -15,6 +15,7 @@ import com.exam.albo.service.Status
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlinx.android.synthetic.main.main_fragment.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 class MainFragment : Fragment() {
@@ -27,8 +28,12 @@ class MainFragment : Fragment() {
     private lateinit var viewModel: MainViewModel
     private var map = hashMapOf<Int, MutableList<ReportResponse>>()
     private var listReportsByMonth = mutableListOf<ReportResponse>()
-    var hashMapCategories = hashMapOf<String, Double>()
     var mapCategoriesForMonth = hashMapOf<Int, HashMap<String, Double>>()
+    var listCategories = ArrayList<CategoriesByMonth>()
+
+    var mapCategoriesForMonthT = hashMapOf<Int, MutableList<CategoriesByMonth>>()
+    var listCategoriesByMonth = mutableListOf<CategoriesByMonth>()
+    var mapCategories = hashMapOf<String, HashMap<String, Double>>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -142,118 +147,155 @@ class MainFragment : Fragment() {
     }
 
     private fun getListCategories(){
-        val listPosition = mutableListOf<Int>()
-        for (report in map){
-            Log.i("POSICION", "POR ----> ${report.key}")
-            listPosition.add(report.key)
-        }
-        var totalAmountOut = 0.0
+        val listEntretaiment = mutableListOf<ReportResponse>()
+        val listServices = mutableListOf<ReportResponse>()
+        val listTransfers = mutableListOf<ReportResponse>()
+        val listRetreats = mutableListOf<ReportResponse>()
+        val listOther = mutableListOf<ReportResponse>()
+        val listTransport = mutableListOf<ReportResponse>()
+        var totalAmountFeeding: Double
+        var totalAmountHome: Double
         var totalPercent = 0.0
+
         for (mapReport in map){
+            Log.i("Lista", "${mapReport.value.size}")
+            totalAmountFeeding = 0.0
+            totalAmountHome = 0.0
+            var category: CategoriesByMonth? = null
             for (report in mapReport.value) {
+                Log.i("Report", "$report")
                 if (report.operation == "out") {
                     when (report.category) {
                         Categories.Feeding.value -> {
-                            totalAmountOut = 0.0
-                            totalPercent = 0.0
-                            val listFeeding = mutableListOf<ReportResponse>()
-                            listFeeding.add(report)
-                            for (feeding in listFeeding){
-                                totalAmountOut += feeding.amount!!
-                                totalPercent = totalAmountOut / 100
-                            }
+                            totalAmountFeeding += report.amount!!
+                            totalPercent = totalAmountFeeding / 100
+                            val hashMapCategories = hashMapOf<String, Double>()
                             hashMapCategories[Categories.Feeding.value] = totalPercent
+                            category = CategoriesByMonth(mapReport.key, hashMapCategories)
                             mapCategoriesForMonth[mapReport.key] = hashMapCategories
                         }
                         Categories.Home.value -> {
-                            val listHome = mutableListOf<ReportResponse>()
-                            listHome.add(report)
-                            totalAmountOut = 0.0
-                            totalPercent = 0.0
-                            for (home in listHome) {
-                                totalAmountOut += home.amount!!
-                                totalPercent = totalAmountOut / 100
-                            }
+                            totalAmountHome += report.amount!!
+                            totalPercent = totalAmountHome / 100
+                            val hashMapCategories = hashMapOf<String, Double>()
                             hashMapCategories[Categories.Home.value] = totalPercent
+                            category = CategoriesByMonth(mapReport.key, hashMapCategories)
                             mapCategoriesForMonth[mapReport.key] = hashMapCategories
                         }
                         Categories.Entretaiment.value -> {
-                            val listEntretaiment = mutableListOf<ReportResponse>()
                             listEntretaiment.add(report)
-                            totalAmountOut = 0.0
-                            totalPercent = 0.0
-                            for (entretaiment in listEntretaiment) {
-                                totalAmountOut += entretaiment.amount!!
-                                totalPercent = totalAmountOut / 100
-                            }
-                            hashMapCategories[Categories.Entretaiment.value] = totalPercent
-                            mapCategoriesForMonth[mapReport.key] = hashMapCategories
                         }
                         Categories.Services.value -> {
-                            val listServices = mutableListOf<ReportResponse>()
                             listServices.add(report)
-                            totalAmountOut = 0.0
-                            totalPercent = 0.0
-                            for (services in listServices){
-                                totalAmountOut += services.amount!!
-                                totalPercent = totalAmountOut / 100
-                            }
-                            hashMapCategories[Categories.Services.value] = totalPercent
-                            mapCategoriesForMonth[mapReport.key] = hashMapCategories
                         }
                         Categories.Transfers.value -> {
-                            val listTransfers = mutableListOf<ReportResponse>()
                             listTransfers.add(report)
-                            totalAmountOut = 0.0
-                            totalPercent = 0.0
-                            for (transfers in listTransfers){
-                                totalAmountOut += transfers.amount!!
-                                totalPercent = totalAmountOut / 100
-                            }
-                            hashMapCategories[Categories.Transfers.value] = totalPercent
-                            mapCategoriesForMonth[mapReport.key] = hashMapCategories
                         }
                         Categories.Retreats.value -> {
-                            val listRetreats = mutableListOf<ReportResponse>()
                             listRetreats.add(report)
-                            totalAmountOut = 0.0
-                            totalPercent = 0.0
-                            for (retreats in listRetreats){
-                                totalAmountOut += retreats.amount!!
-                                totalPercent = totalAmountOut / totalAmountOut
-                            }
-                            hashMapCategories[Categories.Retreats.value] = totalPercent
-                            mapCategoriesForMonth[mapReport.key] = hashMapCategories
                         }
                         Categories.Other.value -> {
-                            val listOther = mutableListOf<ReportResponse>()
                             listOther.add(report)
-                            totalAmountOut = 0.0
-                            totalPercent = 0.0
-                            for (other in listOther) {
-                                totalAmountOut += other.amount!!
-                                totalPercent = totalAmountOut / 100
-                            }
-                            hashMapCategories[Categories.Other.value] = totalPercent
-                            mapCategoriesForMonth[mapReport.key] = hashMapCategories
                         }
                         Categories.Transport.value -> {
-                            val listTransport = mutableListOf<ReportResponse>()
                             listTransport.add(report)
-                            totalAmountOut = 0.0
-                            totalPercent = 0.0
-                            for (transport in listTransport){
-                                totalAmountOut += transport.amount!!
-                                totalPercent = totalAmountOut / 100
-                            }
-                            hashMapCategories[Categories.Transport.value] = totalPercent
-                            mapCategoriesForMonth[mapReport.key] = hashMapCategories
                         }
                     }
                 }
+                Log.i("CATEGORIAS", "QUE TIENE ${listCategories}")
             }
         }
-        hashMapCategories.toList().sortedBy { (k, v) -> v}.toMap()
+        /*for (mapReport in map) {
+            hashMapCategories = hashMapOf()
+            for (report in mapReport.value) {
+                when (report.category) {
+                    Categories.Feeding.value -> {
+                        totalAmountOut = 0.0
+                        totalPercent = 0.0
+                        for (feeding in listFeeding){
+                            totalAmountOut += feeding.amount!!
+                            totalPercent = totalAmountOut / 100
+                        }
+                        hashMapCategories[Categories.Feeding.value] = totalPercent
+                        mapCategoriesForMonth[mapReport.key] = hashMapCategories
+                    }
+                    Categories.Home.value -> {
+                        totalAmountOut = 0.0
+                        totalPercent = 0.0
+                        for (home in listHome) {
+                            totalAmountOut += home.amount!!
+                            totalPercent = totalAmountOut / 100
+                        }
+                        hashMapCategories[Categories.Home.value] = totalPercent
+                        mapCategoriesForMonth[mapReport.key] = hashMapCategories
+                    }
+                    Categories.Entretaiment.value -> {
+                        totalAmountOut = 0.0
+                        totalPercent = 0.0
+                        for (entretaiment in listEntretaiment) {
+                            totalAmountOut += entretaiment.amount!!
+                            totalPercent = totalAmountOut / 100
+                        }
+                        hashMapCategories[Categories.Entretaiment.value] = totalPercent
+                        mapCategoriesForMonth[mapReport.key] = hashMapCategories
+                    }
+                    Categories.Services.value -> {
+                        totalAmountOut = 0.0
+                        totalPercent = 0.0
+                        for (services in listServices){
+                            totalAmountOut += services.amount!!
+                            totalPercent = totalAmountOut / 100
+                        }
+                        hashMapCategories[Categories.Services.value] = totalPercent
+                        mapCategoriesForMonth[mapReport.key] = hashMapCategories
+                    }
+                    Categories.Transfers.value -> {
+                        totalAmountOut = 0.0
+                        totalPercent = 0.0
+                        for (transfers in listTransfers){
+                            totalAmountOut += transfers.amount!!
+                            totalPercent = totalAmountOut / 100
+                        }
+                        hashMapCategories[Categories.Transfers.value] = totalPercent
+                        mapCategoriesForMonth[mapReport.key] = hashMapCategories
+                    }
+                    Categories.Retreats.value -> {
+                        totalAmountOut = 0.0
+                        totalPercent = 0.0
+                        for (retreats in listRetreats){
+                            totalAmountOut += retreats.amount!!
+                            totalPercent = totalAmountOut / totalAmountOut
+                        }
+                        hashMapCategories[Categories.Retreats.value] = totalPercent
+                        mapCategoriesForMonth[mapReport.key] = hashMapCategories
+                    }
+                    Categories.Other.value -> {
+                        totalAmountOut = 0.0
+                        totalPercent = 0.0
+                        for (other in listOther) {
+                            totalAmountOut += other.amount!!
+                            totalPercent = totalAmountOut / 100
+                        }
+                        hashMapCategories[Categories.Other.value] = totalPercent
+                        mapCategoriesForMonth[mapReport.key] = hashMapCategories
+                    }
+                    Categories.Transport.value -> {
+                        totalAmountOut = 0.0
+                        totalPercent = 0.0
+                        for (transport in listTransport){
+                            totalAmountOut += transport.amount!!
+                            totalPercent = totalAmountOut / 100
+                        }
+                        hashMapCategories[Categories.Transport.value] = totalPercent
+                        mapCategoriesForMonth[mapReport.key] = hashMapCategories
+                    }
+                }
+            }
+        }*/
+        Log.i("SIZECATE", "${mapCategoriesForMonth.size}")
+        for (cate in mapCategoriesForMonth){
+            Log.i("Categorias", "${cate.key} ===> ${cate.value}")
+        }
         /*for (categories in hashMapCategories){
             val itemCategory = View.inflate(context, R.layout.item_categories, null)
             itemCategory.tvTitleCategory.text = categories.key
@@ -263,5 +305,10 @@ class MainFragment : Fragment() {
             //binding.llCategories.addView(itemCategory)
         }*/
     }
+
+    data class CategoriesByMonth(
+            val category: Int,
+            val hashMapCategories: HashMap<String, Double>
+    )
 
 }

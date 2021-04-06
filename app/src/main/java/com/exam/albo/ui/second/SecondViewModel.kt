@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.exam.albo.service.ListBeers
 import com.exam.albo.service.Resource
 import com.exam.albo.service.SecondRepository
+import com.exam.albo.service.beers.BeerK
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -18,11 +19,11 @@ class SecondViewModel : ViewModel()  {
         SecondRepository()
     }
 
-    fun getBeers(){
+    fun getBeers(page: Int, perPage: Int){
         try {
             viewModelScope.launch {
                 beersLiveData.value = Resource.loading(null)
-                val responseData = secondRepository.getBeers()
+                val responseData = secondRepository.getBeers(page, perPage)
                 withContext(Dispatchers.IO){
                     beersLiveData.postValue(responseData)
                 }

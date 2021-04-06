@@ -14,19 +14,14 @@ import com.exam.albo.ui.second.SecondViewModel
 
 class SecondPartActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: SecondViewModel
-    var listBeers: MutableList<BeerK>? = null
-    var beer: BeerK? = null
+    //private lateinit var viewModel: SecondViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.second_part_activity)
-        viewModel = ViewModelProvider(this).get(SecondViewModel::class.java)
-        subscribeLiveData()
-        viewModel.getBeers()
     }
 
-    private fun subscribeLiveData(){
+    /*private fun subscribeLiveData(){
         viewModel.beersLiveData.observe(this, Observer {
             when (it.status){
                 Status.LOADING -> {
@@ -54,6 +49,6 @@ class SecondPartActivity : AppCompatActivity() {
                     fragment.updateProduct()
             }
         }
-    }
+    }*/
 
 }

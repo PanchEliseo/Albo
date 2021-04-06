@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -23,6 +24,12 @@ import kotlinx.android.synthetic.main.second_part_fragment.*
 
 class SecondPartFragment : Fragment(), ClickItemList {
 
+    private lateinit var viewModel: SecondViewModel
+    private val modelDetail: DetailViewModel by activityViewModels()
+    var page = 1
+    var adapter : BeersAdapter? = null
+    private var recreate = false
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.second_part_fragment, container, false)
@@ -31,28 +38,77 @@ class SecondPartFragment : Fragment(), ClickItemList {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         (activity as AppCompatActivity).supportActionBar?.title = ""
-        val list = (activity as SecondPartActivity).listBeers
-        if (list != null)
-            setListView(list)
+        viewModel = ViewModelProvider(this).get(SecondViewModel::class.java)
+        subscribeLiveData()
+        setListeners()
+        recreate = true
+        if (modelDetail.listLiveData.value == null)
+            viewModel.getBeers(page, 20)
+        else {
+            setListView(modelDetail.listLiveData.value!!)
+        }
     }
 
     private fun setListView(listBeers: MutableList<BeerK>){
-        val adapter = activity?.let { BeersAdapter(requireContext(), listBeers) }
+        adapter = activity?.let { BeersAdapter(requireContext(), listBeers) }!!
         rvBeers.adapter = adapter
         rvBeers.layoutManager = LinearLayoutManager(activity)
-        adapter!!.setListenerClick(this)
+        adapter?.setListenerClick(this)
     }
 
-    override fun clickButtons(view: View, position: Int) {
-        val list = (activity as SecondPartActivity).listBeers
-        (activity as SecondPartActivity).beer = list?.get(position)
+    private fun updateList(listBeers: MutableList<BeerK>){
+        adapter?.updateList(listBeers)
+    }
+
+    override fun clickButtons(view: View, position: Int, list: MutableList<BeerK>) {
+        modelDetail.select(list[position])
+        modelDetail.setList(list)
         findNavController().navigate(R.id.action_beersFragment_to_detailBeer)
     }
+    
+    private fun setListeners() {
+        swipeLayout.setOnRefreshListener {
+            page++
+            recreate = false
+            viewModel.getBeers(page, 20)
+        }
+    }
 
-    fun updateProduct(){
-        val list = (activity as SecondPartActivity).listBeers
-        if (!list.isNullOrEmpty())
-            setListView(list)
+    private fun subscribeLiveData(){
+        viewModel.beersLiveData.observe(viewLifecycleOwner, Observer {
+            when (it.status){
+                Status.LOADING -> {
+                    Log.i("ON", "LOADING")
+                    swipeLayout.isRefreshing = true
+                }
+                Status.SUCCESS -> {
+                    Log.i("ON", "SUCCESS ${it.data}")
+                    //listBeers = it.data!!.listBeers
+                    //updateInfo()
+                    swipeLayout.isRefreshing = false
+                    if (modelDetail.listLiveData.value == null) {
+                        if (page == 1 || recreate)
+                            setListView(it.data!!.listBeers)
+                        else
+                            updateList(it.data!!.listBeers)
+                    } else {
+                        if (!recreate)
+                            updateList(it.data!!.listBeers)
+                    }
+                }
+                Status.ERROR -> {
+                    Log.i("ON", "ERROR")
+                    swipeLayout.isRefreshing = false
+                }
+            }
+        })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        adapter = null
+        rvBeers.adapter = null
+        rvBeers.layoutManager = null
     }
 
 }
